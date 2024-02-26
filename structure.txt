@@ -1,0 +1,12 @@
+app/
+    component
+        blog.component
+
+    shared/
+        styles/
+            _variables.scss
+            _mixins.scss
+            _base.scss
+        interfaces/
+        services/
+        

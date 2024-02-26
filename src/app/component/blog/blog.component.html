@@ -1,0 +1,138 @@
+<header class="header">
+
+  <nav class="navbar header">
+    <div class="container-fluid">
+      <a class="navbar-brand">Angular Blog</a>
+      <form class="d-flex" role="search">
+        <span *ngIf="!signInStatus">
+          <button class="btn btn-outline-success" type="button" data-bs-toggle="modal" data-bs-target="#SignInModal" >Sign In</button>
+          <button class="btn btn-outline-success" type="button" data-bs-toggle="modal" data-bs-target="#SignUpModal" >Sign Up</button>
+        </span>
+        <span *ngIf="signInStatus">
+          <button class="btn btn-outline-success" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" >Add post</button>
+          <div class="btn btn-outline-success bg-warning">{{userName}}</div>
+          <button class="btn btn-outline-success" type="button" (click)="signOut()" >Sign Out</button>
+        </span>
+
+      </form>
+    </div>
+  </nav>
+
+</header>
+<main>
+  <ng-container *ngIf="usersPostsArr.length > 0">
+  
+  <div class="border border-2 mx-auto my-3 p-2 rounded-3 col-10" *ngFor="let post of usersPostsArr">
+    <div class="d-flex">
+      <div class="col-10">
+        <h3>{{post.topic}}</h3>
+        <h4>Posted by: {{post.postedBy}}</h4>
+        <p>{{post.message}}</p>
+      </div>
+      <div class="col-2 d-flex justify-content-end align-items-center">
+        <!-- <i class="uil uil-clock"></i> -->
+        <p>{{post.date | date:'HH:mm, dd.MM.YYYY '}}</p>
+      </div>
+    </div>
+    <div class="col-12 text-end" *ngIf="signInStatus && post.postedBy === userName ||userName === 'admin'">
+      <button class="btn btn-warning" type="button" (click)="editPost(post)" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Edit
+      </button>
+      <button [disabled]="editStatus" class="btn btn-danger" type="button" (click)="deletePost(post)">
+        Delete
+      </button>
+    </div>
+
+  </div>
+</ng-container>
+<ng-container *ngIf="usersPostsArr.length === 0">
+  <h1 class="m-3 p-2 text-center">No posts added yet</h1>
+</ng-container>
+
+
+
+</main>
+
+
+
+
+
+<!-- AddAndRemovePostModal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 *ngIf="!editStatus" class="modal-title fs-5" id="exampleModalLabel" >Add post</h1>
+        <h1 *ngIf="editStatus" class="modal-title fs-5" id="exampleModalLabel">Edit post</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="topic" class="form-label">Title</label>
+        <input type="text" class="form-control" id="topic" aria-describedby="emailHelp" [(ngModel)]="topic" name="topic"
+          [ngModelOptions]="{standalone: true}">
+        <label for="text" class="form-label">Text:</label>
+        <textarea class="form-control" id="text" [(ngModel)]="message" name="text" [ngModelOptions]="{standalone: true}">
+        </textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Close</button>
+        <button *ngIf="!editStatus" type="button" [disabled]="!topic || !message" class="btn btn-primary" (click)="addPost()" data-bs-dismiss="modal">Post</button>
+        <button *ngIf="editStatus" type="button" [disabled]="!topic || !message" class="btn btn-warning" (click)="savePost()" data-bs-dismiss="modal">Edit Post</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SingInModal -->
+<div class="modal fade" id="SignInModal" tabindex="-1" aria-labelledby="SignInModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="SignInModalLabel">Sign In</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="emailSignIn" class="form-label">Email:</label>
+        <input type="text" class="form-control" id="emailSignIn"  [(ngModel)]="emailSignIn" name="emailSignIn"
+          [ngModelOptions]="{standalone: true}" placeholder="admin@gmail.com">
+          <label for="passwordSignIn" class="form-label">Password</label>
+          <input type="text" class="form-control" id="passwordSignIn" [(ngModel)]="passwordSignIn" name="passwordSignIn" (input)="checkDataToSignIn()"
+            [ngModelOptions]="{standalone: true}" placeholder="admin">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Close</button>
+        <button type="button" [disabled]="!checkDataSignIn" class="btn btn-warning" (click)="signIn()" data-bs-dismiss="modal">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SingUpModal -->
+<div class="modal fade" id="SignUpModal" tabindex="-1" aria-labelledby="SignUpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="SignUpModalLabel">Sign Up</h1>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="userName" class="form-label">Username: 
+        </label>
+        <input type="text" class="form-control" id="userName" aria-describedby="emailHelp" [(ngModel)]="userNameSignUp" name="userNameSignUp"
+          [ngModelOptions]="{standalone: true}"
+          (input)="checkUsernameToSignUp()">
+        <label for="emailSignUp" class="form-label">Email:</label>
+        <input type="text" class="form-control" id="emailSingUn" aria-describedby="emailHelp" [(ngModel)]="emailSignUp" name="emailSignUp"
+          [ngModelOptions]="{standalone: true}" (input)="checkEmailToSignUp()">
+          <label for="passwordSignUp" class="form-label">Password</label>
+          <input type="text" class="form-control" id="passwordSignUp" aria-describedby="emailHelp" [(ngModel)]="passwordSignUp" name="passwordSignUp" 
+            [ngModelOptions]="{standalone: true}" [disabled]="!checkEmailSignUp || !checkUsernameSignUp">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Close</button>
+        <button type="button" class="btn btn-warning" data-bs-dismiss="modal" [disabled]="!checkEmailSignUp || !checkUsernameSignUp ||!passwordSignUp" (click)="addNewUser()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
